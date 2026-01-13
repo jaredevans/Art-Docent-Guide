@@ -1,5 +1,5 @@
 export async function generateGuide(primaryImage, artworkText) {
-  const response = await fetch('/api/generate-guide', {
+  const response = await fetch(`${import.meta.env.BASE_URL}api/generate-guide`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

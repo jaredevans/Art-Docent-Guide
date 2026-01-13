@@ -19,6 +19,9 @@ app.use('/api', generateRouter)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })
 })
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' })
+})
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -65,6 +65,90 @@ A web application that helps art docents create comprehensive presentation guide
 
 5. Open [http://localhost:5173](http://localhost:5173) in your browser.
 
+## Production Deployment
+
+### Build
+
+```bash
+npm run build
+```
+
+### API
+
+The API runs separately from the static frontend build.
+
+- Default port: `3011` (set via `PORT`)
+- Health check: `/health` and `/api/health`
+
+Run locally:
+```bash
+PORT=3011 npm run server
+```
+
+Systemd (example):
+```bash
+sudo systemctl enable --now art-docent-guide-api.service
+sudo systemctl restart art-docent-guide-api.service
+sudo journalctl -u art-docent-guide-api.service -f
+```
+
+Example unit file (`/etc/systemd/system/art-docent-guide-api.service`):
+```ini
+[Unit]
+Description=Art Docent Guide API
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/www/Art-Docent-Guide
+Environment=PORT=3011
+Environment=NODE_ENV=production
+EnvironmentFile=-/var/www/Art-Docent-Guide/.env
+ExecStart=/usr/bin/node /var/www/Art-Docent-Guide/server/index.js
+Restart=on-failure
+RestartSec=5
+User=www-data
+Group=www-data
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Nginx
+
+This app is designed to be served under `/docentguide/`:
+
+- Frontend static build: `/var/www/Art-Docent-Guide/dist/`
+- API proxy: `/docentguide/api/` → `http://127.0.0.1:3011/`
+
+Example nginx locations:
+```nginx
+location = /docentguide {
+    return 301 /docentguide/;
+}
+
+location /docentguide/api/ {
+    rewrite ^/docentguide/api/(.*)$ /api/$1 break;
+    proxy_pass http://127.0.0.1:3011/;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+}
+
+location /docentguide/ {
+    alias /var/www/Art-Docent-Guide/dist/;
+    index index.html;
+    try_files $uri $uri/ /docentguide/index.html;
+}
+```
+
+After updates:
+```bash
+sudo nginx -t && sudo systemctl reload nginx
+```
+
 ## Usage
 
 1. **Upload Images** - Drag and drop or click to upload up to 3 artwork images. The first image is used as the primary image for AI analysis.

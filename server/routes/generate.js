@@ -102,6 +102,46 @@ Return a JSON object with these exact keys:
 Return ONLY the JSON object, no markdown code fences or additional text.`
 }
 
+function sanitizeJsonString(input) {
+  let output = ''
+  let inString = false
+  let escaped = false
+
+  for (const ch of input) {
+    if (escaped) {
+      output += ch
+      escaped = false
+      continue
+    }
+
+    if (ch === '\\') {
+      output += ch
+      escaped = true
+      continue
+    }
+
+    if (ch === '"') {
+      inString = !inString
+      output += ch
+      continue
+    }
+
+    if (inString) {
+      const code = ch.charCodeAt(0)
+      if (code < 0x20) {
+        if (ch === '\n') output += '\\n'
+        else if (ch === '\r') output += '\\r'
+        else if (ch === '\t') output += '\\t'
+        continue
+      }
+    }
+
+    output += ch
+  }
+
+  return output
+}
+
 async function generateGuide(imageData, artworkText) {
   const apiKey = process.env.GEMINI_API_KEY
 
@@ -110,7 +150,12 @@ async function generateGuide(imageData, artworkText) {
   }
 
   const genAI = new GoogleGenerativeAI(apiKey)
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' })
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    generationConfig: {
+      responseMimeType: 'application/json'
+    }
+  })
 
   // Extract base64 data and mime type from data URL
   const matches = imageData.match(/^data:(.+);base64,(.+)$/)
@@ -146,7 +191,17 @@ async function generateGuide(imageData, artworkText) {
         throw new Error('Invalid response format from AI')
       }
 
-      const guide = JSON.parse(jsonMatch[0])
+      const jsonString = jsonMatch[0]
+      let guide
+      try {
+        guide = JSON.parse(jsonString)
+      } catch (parseError) {
+        try {
+          guide = JSON.parse(sanitizeJsonString(jsonString))
+        } catch {
+          throw parseError
+        }
+      }
       return guide
     } catch (error) {
       lastError = error
