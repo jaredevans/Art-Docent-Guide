@@ -12,6 +12,9 @@ export async function generateGuide(primaryImage, artworkText) {
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
+    if (response.status === 403) {
+      throw new Error(error.message || 'Access denied')
+    }
     throw new Error(error.message || 'Failed to generate guide')
   }
 
