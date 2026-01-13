@@ -2,6 +2,12 @@
 
 A web application that helps art docents create comprehensive presentation guides for gallery tours. Upload artwork images and provide background information, then use Google's Gemini AI to generate engaging, audience-ready presentation materials.
 
+## Screenshots
+
+<a href="1.png"><img src="1.png" alt="Upload artwork and enter information" height="500"></a>
+
+<a href="2.png"><img src="2.png" alt="Generated presentation guide" height="500"></a>
+
 ## Features
 
 - **Image Upload** - Support for up to 3 images per artwork (JPEG, PNG, WebP)
