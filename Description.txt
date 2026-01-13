@@ -1,0 +1,7 @@
+This tool gives you a head start by generating a draft guide you can build on.
+You upload an artwork image and your notes, and it creates a clear guide with
+an overview, key details to point out, questions to ask, and a simple 10-minute
+flow.
+
+Use it as a starting point, not a final script. You decide what to keep, change,
+or add, so the guide matches your voice and the needs of your tour.
