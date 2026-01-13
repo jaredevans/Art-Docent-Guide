@@ -79,6 +79,7 @@ The API runs separately from the static frontend build.
 
 - Default port: `3011` (set via `PORT`)
 - Health check: `/health` and `/api/health`
+- Access control: requests are allowed only from US states listed in `allowed_states.txt`
 
 Run locally:
 ```bash
@@ -113,6 +114,11 @@ Group=www-data
 [Install]
 WantedBy=multi-user.target
 ```
+
+### Access Control
+
+Allowed states are defined in `allowed_states.txt` (one per line, state abbreviations).
+Changes to the file are picked up automatically on the next request.
 
 ### Nginx
 
